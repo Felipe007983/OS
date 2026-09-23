@@ -1,0 +1,376 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+// -------------------------------------------------------------
+// MULTI-TENANCY: Empresas / Tenants
+// -------------------------------------------------------------
+model Company {
+  id          String   @id @default(uuid())
+  name        String
+  tradeName   String?
+  cnpj        String?
+  phone       String?
+  email       String?
+  address     String?
+  logoUrl     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users         User[]
+  thirdParties  ThirdParty[]
+  products      Product[]
+  serviceOrders ServiceOrder[]
+  payments      Payment[]
+  auditLogs     AuditLog[]
+
+  @@map("companies")
+}
+
+// -------------------------------------------------------------
+// AUTENTICAÇÃO E USUÁRIOS
+// -------------------------------------------------------------
+model User {
+  id           String    @id @default(uuid())
+  companyId    String
+  company      Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         String    @default("ADMIN") // ADMIN, COSTUREIRA
+  cpfCnpj      String?
+  phone        String?
+  whatsapp     String?
+  address      String?
+  status       String    @default("ATIVO") // ATIVO, INATIVO
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  thirdParty        ThirdParty?
+  createdOrders     ServiceOrder[]     @relation("CreatedByUser")
+  productionRecords ProductionRecord[]
+  auditLogs         AuditLog[]
+
+  @@map("users")
+}
+
+// -------------------------------------------------------------
+// TERCEIROS / COSTUREIRAS / FACÇÕES
+// -------------------------------------------------------------
+model ThirdParty {
+  id          String   @id @default(uuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  userId      String?  @unique
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  name        String
+  cpfCnpj     String?
+  phone       String?
+  whatsapp    String
+  email       String?
+  city        String?
+  state       String?
+  address     String?
+  pixKey      String?
+  pixType     String?  // CPF, CNPJ, EMAIL, TELEFONE, ALEATORIA
+  bankInfo    String?
+  notes       String?
+  status      String   @default("ATIVO") // ATIVO, INATIVO
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  serviceOrders ServiceOrder[]
+  payments      Payment[]
+
+  @@map("third_parties")
+}
+
+// -------------------------------------------------------------
+// CATÁLOGO DE PRODUTOS / PEÇAS
+// -------------------------------------------------------------
+model Product {
+  id               String   @id @default(uuid())
+  companyId        String
+  company          Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  name             String
+  sku              String?
+  category         String?
+  description      String?
+  defaultUnitPrice Float    @default(0)
+  active           Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  orderItems ServiceOrderItem[]
+
+  @@map("products")
+}
+
+// -------------------------------------------------------------
+// ORDENS DE SERVIÇO (OS)
+// -------------------------------------------------------------
+model ServiceOrder {
+  id              String    @id @default(uuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  orderNumber     Int       // Ex: 1001, sequencial
+  thirdPartyId    String
+  thirdParty      ThirdParty @relation(fields: [thirdPartyId], references: [id], onDelete: Restrict)
+
+  createdByUserId String
+  createdByUser   User      @relation("CreatedByUser", fields: [createdByUserId], references: [id], onDelete: Restrict)
+
+  // Modelo de precificação: "UNIT_PRICE" ou "FIXED_PRICE"
+  pricingModel    String    @default("UNIT_PRICE")
+  fixedPriceAmount Float?
+
+  totalPieces     Int       @default(0)
+  totalAmount     Float     @default(0)
+
+  dueDate         DateTime
+  sentAt          DateTime?
+
+  // Status da máquina de estados:
+  // RASCUNHO, ENVIADA, AGUARDANDO_ACEITE, ACEITA, RECUSADA,
+  // EM_PRODUCAO, PARCIALMENTE_ENTREGUE, CONFERENCIA, FINALIZADA, CANCELADA
+  status          String    @default("RASCUNHO")
+
+  version         Int       @default(1)
+  notes           String?
+
+  // Dados de Aceite Digital
+  acceptedAt      DateTime?
+  acceptedIp      String?
+  acceptedUserAgent String?
+  acceptanceType  String?   // "LOGIN", "PUBLIC_LINK"
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  items             ServiceOrderItem[]
+  acceptanceTokens  AcceptanceToken[]
+  acceptanceRecords AcceptanceRecord[]
+  deliveries        Delivery[]
+  payments          Payment[]
+  statusHistory     OrderStatusHistory[]
+
+  @@unique([companyId, orderNumber])
+  @@map("service_orders")
+}
+
+// -------------------------------------------------------------
+// HISTÓRICO DE STATUS DA OS (AUDITORIA DE TRANSIÇÕES)
+// -------------------------------------------------------------
+model OrderStatusHistory {
+  id             String       @id @default(uuid())
+  serviceOrderId String
+  serviceOrder   ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
+  fromStatus     String
+  toStatus       String
+  reason         String?
+  changedBy      String?      // Nome ou ID do usuário / "SISTEMA" / "COSTUREIRA"
+  createdAt      DateTime     @default(now())
+
+  @@map("order_status_history")
+}
+
+// -------------------------------------------------------------
+// ITENS DA ORDEM DE SERVIÇO
+// -------------------------------------------------------------
+model ServiceOrderItem {
+  id                String       @id @default(uuid())
+  serviceOrderId    String
+  serviceOrder      ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
+
+  productId         String?
+  product           Product?     @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  productName       String       // Nome no momento da criação da OS
+  description       String?
+  quantityRequested Int
+  unitPrice         Float
+  totalPrice        Float
+
+  quantityProduced  Int          @default(0)
+  quantityDelivered Int          @default(0)
+  quantityApproved  Int          @default(0)
+  quantityRejected  Int          @default(0)
+  rejectionReason   String?
+
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  productionRecords ProductionRecord[]
+  deliveryItems     DeliveryItem[]
+
+  @@map("service_order_items")
+}
+
+// -------------------------------------------------------------
+// TOKEN DE ACEITE PÚBLICO (WHATSAPP LINK SEGURO)
+// -------------------------------------------------------------
+model AcceptanceToken {
+  id              String       @id @default(uuid())
+  serviceOrderId  String
+  serviceOrder    ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
+
+  token           String       @unique
+  expiresAt       DateTime
+  usedAt          DateTime?
+  revoked         Boolean      @default(false)
+  snapshotJson    String       // Estado imutável da OS no momento do envio
+
+  createdAt       DateTime     @default(now())
+
+  @@map("acceptance_tokens")
+}
+
+// -------------------------------------------------------------
+// REGISTRO DE EVIDÊNCIA DE ACEITE / RECUSA
+// -------------------------------------------------------------
+model AcceptanceRecord {
+  id              String       @id @default(uuid())
+  serviceOrderId  String
+  serviceOrder    ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
+
+  version         Int
+  action          String       // "ACEITO", "RECUSADO"
+  rejectionReason String?
+  acceptedTerms   String
+  snapshotData    String       // Cópia congelada dos dados
+  ipAddress       String?
+  userAgent       String?
+  tokenUsed       String?
+  timestamp       DateTime     @default(now())
+
+  @@map("acceptance_records")
+}
+
+// -------------------------------------------------------------
+// APONTAMENTOS DE PRODUÇÃO (COSTUREIRA)
+// -------------------------------------------------------------
+model ProductionRecord {
+  id                 String           @id @default(uuid())
+  serviceOrderItemId String
+  serviceOrderItem   ServiceOrderItem @relation(fields: [serviceOrderItemId], references: [id], onDelete: Cascade)
+
+  quantity           Int
+  notes              String?
+  recordedByUserId   String?
+  recordedByUser     User?            @relation(fields: [recordedByUserId], references: [id], onDelete: SetNull)
+  createdAt          DateTime         @default(now())
+
+  @@map("production_records")
+}
+
+// -------------------------------------------------------------
+// REMESSAS DE ENTREGA (PARCIAIS OU TOTAIS)
+// -------------------------------------------------------------
+model Delivery {
+  id              String         @id @default(uuid())
+  serviceOrderId  String
+  serviceOrder    ServiceOrder   @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
+
+  deliveryNumber  Int            @default(1)
+  deliveryDate    DateTime       @default(now())
+  status          String         @default("AGUARDANDO_CONFERENCIA") // AGUARDANDO_CONFERENCIA, CONFERIDO, DIVERGENCIA
+  notes           String?
+  receiptPhotoUrl String?
+  conferencedAt   DateTime?
+  conferencedBy   String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  items           DeliveryItem[]
+
+  @@map("deliveries")
+}
+
+// -------------------------------------------------------------
+// ITENS DA REMESSA DE ENTREGA
+// -------------------------------------------------------------
+model DeliveryItem {
+  id                 String           @id @default(uuid())
+  deliveryId         String
+  delivery           Delivery         @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+
+  serviceOrderItemId String
+  serviceOrderItem   ServiceOrderItem @relation(fields: [serviceOrderItemId], references: [id], onDelete: Cascade)
+
+  quantityDelivered  Int
+  quantityApproved   Int              @default(0)
+  quantityRejected   Int              @default(0)
+  rejectionReason    String?
+
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@map("delivery_items")
+}
+
+// -------------------------------------------------------------
+// MÓDULO FINANCEIRO / PAGAMENTOS
+// -------------------------------------------------------------
+model Payment {
+  id              String       @id @default(uuid())
+  companyId       String
+  company         Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  serviceOrderId  String
+  serviceOrder    ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
+
+  thirdPartyId    String
+  thirdParty      ThirdParty   @relation(fields: [thirdPartyId], references: [id], onDelete: Restrict)
+
+  expectedAmount  Float
+  calculatedAmount Float       // Baseado na conferência final aprovada
+  paidAmount      Float        @default(0)
+  remainingAmount Float        @default(0)
+
+  status          String       @default("PENDENTE") // PENDENTE, PARCIAL, PAGO, CANCELADO
+  paymentMethod   String?      // PIX, TED, DINHEIRO, BOLETO
+  paidAt          DateTime?
+  receiptUrl      String?
+  notes           String?
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@map("payments")
+}
+
+// -------------------------------------------------------------
+// AUDITORIA GERAL (LOGS DE SEGURANÇA E RASTREABILIDADE)
+// -------------------------------------------------------------
+model AuditLog {
+  id         String   @id @default(uuid())
+  companyId  String?
+  company    Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  action     String   // CREATE, UPDATE, DELETE, ACCEPT_OS, REJECT_OS, STATUS_CHANGE, PAYMENT
+  entity     String   // ServiceOrder, ThirdParty, Payment, User, etc.
+  entityId   String?
+  oldValues  String?  // JSON
+  newValues  String?  // JSON
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@map("audit_logs")
+}
