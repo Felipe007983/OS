@@ -67,8 +67,8 @@ export function SignOrderPage() {
   const { order } = data;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-brand-700 via-brand-800 to-brand-900">
-      <div className="mx-auto max-w-lg px-4 py-10">
+    <div className="min-h-[100dvh] bg-gradient-to-b from-brand-700 via-brand-800 to-brand-900 pb-safe">
+      <div className="mx-auto max-w-lg px-4 py-6 sm:py-10">
         <div className="mb-8 flex flex-col items-center gap-3">
           <Logo size="lg" />
           <div className="text-center">

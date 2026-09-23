@@ -14,6 +14,7 @@ import {
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Logo } from './Logo';
+import { MobileBottomNav } from './MobileBottomNav';
 import { cn } from '../lib/utils';
 
 const adminLinks = [
@@ -113,9 +114,11 @@ export function Layout() {
           </p>
         </header>
 
-        <main className="flex-1 p-4 lg:p-8">
+        <main className="flex-1 p-3 pb-24 sm:p-4 lg:p-8 lg:pb-8">
           <Outlet />
         </main>
+
+        <MobileBottomNav onOpenMenu={() => setSidebarOpen(true)} />
       </div>
     </div>
   );

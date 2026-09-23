@@ -3,8 +3,21 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     @apply bg-white text-slate-900 antialiased;
+    overflow-x: hidden;
+  }
+
+  /* Evita zoom automático no iOS ao focar inputs */
+  @media (max-width: 640px) {
+    .input-field {
+      font-size: 16px;
+    }
   }
 }
 
@@ -14,19 +27,60 @@
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-brand-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .btn-danger {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .card {
-    @apply rounded-xl border border-slate-200 bg-white p-5 shadow-sm;
+    @apply rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5;
+  }
+
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .table-scroll-wrap {
+    @apply relative;
+  }
+
+  .table-scroll-hint {
+    @apply mb-2 block px-1 text-center text-[10px] font-medium text-slate-400 md:hidden;
+  }
+
+  .table-scroll {
+    @apply -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table-scroll table {
+    @apply min-w-[640px];
+  }
+
+  .mobile-card {
+    @apply rounded-xl border border-slate-200 bg-white p-4 shadow-sm active:bg-slate-50;
+  }
+
+  .mobile-card-row {
+    @apply flex items-center justify-between gap-2 py-1.5 text-sm;
+  }
+
+  .mobile-card-label {
+    @apply text-xs text-slate-500;
+  }
+
+  .mobile-card-value {
+    @apply font-medium text-slate-900 text-right;
+  }
+
+  .action-grid {
+    @apply grid grid-cols-2 gap-2 sm:flex sm:flex-wrap;
   }
 
   .page-container {

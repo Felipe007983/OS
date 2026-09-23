@@ -70,7 +70,30 @@ export function ProductsPage() {
       {loading ? (
         <div className="flex justify-center py-12"><div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-500 border-t-transparent" /></div>
       ) : (
-        <div className="card overflow-hidden p-0">
+        <>
+        <div className="space-y-3 md:hidden">
+          {list.map((p) => (
+            <div key={p.id} className="mobile-card">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="font-semibold text-slate-900">{p.name}</p>
+                  <p className="text-sm text-slate-500">{p.category || 'Sem categoria'}</p>
+                </div>
+                <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${p.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                  {p.active ? 'Ativo' : 'Inativo'}
+                </span>
+              </div>
+              <div className="mt-3 flex items-center justify-between">
+                <p className="text-lg font-bold text-brand-700">{formatCurrency(p.defaultUnitPrice)}</p>
+                <button onClick={() => openEdit(p)} className="btn-secondary text-xs px-3 py-1.5">Editar</button>
+              </div>
+            </div>
+          ))}
+          {list.length === 0 && <p className="py-12 text-center text-slate-400">Nenhum produto cadastrado</p>}
+        </div>
+
+        <div className="card hidden overflow-hidden p-0 md:block">
+          <div className="table-scroll">
           <table className="w-full text-sm">
             <thead className="border-b border-slate-100 bg-slate-50">
               <tr>
@@ -102,7 +125,9 @@ export function ProductsPage() {
             </tbody>
           </table>
           {list.length === 0 && <p className="py-12 text-center text-slate-400">Nenhum produto cadastrado</p>}
+          </div>
         </div>
+        </>
       )}
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar Produto' : 'Novo Produto'}>

@@ -116,7 +116,36 @@ export function UsersPage() {
       {loading ? (
         <div className="flex justify-center py-16"><div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-500 border-t-transparent" /></div>
       ) : (
-        <div className="card overflow-hidden p-0">
+        <>
+        <div className="space-y-3 md:hidden">
+          {users.map((u) => (
+            <div key={u.id} className="mobile-card">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="font-semibold text-slate-900 truncate">{u.name}</p>
+                  <p className="text-sm text-slate-500 truncate">{u.email}</p>
+                </div>
+                <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${u.status === 'ATIVO' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                  {u.status}
+                </span>
+              </div>
+              <div className="mt-3 flex items-center justify-between">
+                <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${u.role === 'ADMIN' ? 'bg-violet-100 text-violet-800' : 'bg-blue-100 text-blue-800'}`}>
+                  {u.role === 'ADMIN' ? <Shield className="h-3 w-3" /> : <User className="h-3 w-3" />}
+                  {u.role === 'ADMIN' ? 'Admin' : 'Costureira'}
+                </span>
+                <div className="flex gap-2">
+                  <button onClick={() => openEdit(u)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-brand-600"><Pencil className="h-4 w-4" /></button>
+                  <button onClick={() => handleDelete(u)} className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-600"><Trash2 className="h-4 w-4" /></button>
+                </div>
+              </div>
+            </div>
+          ))}
+          {users.length === 0 && <p className="py-12 text-center text-slate-400">Nenhum usuário cadastrado</p>}
+        </div>
+
+        <div className="card hidden overflow-hidden p-0 md:block">
+          <div className="table-scroll">
           <table className="w-full text-sm">
             <thead className="border-b border-slate-100 bg-slate-50/80">
               <tr>
@@ -158,7 +187,9 @@ export function UsersPage() {
             </tbody>
           </table>
           {users.length === 0 && <p className="py-16 text-center text-slate-400">Nenhum usuário cadastrado</p>}
+          </div>
         </div>
+        </>
       )}
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar Usuário' : 'Novo Usuário'} size="lg">

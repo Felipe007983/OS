@@ -120,7 +120,43 @@ export function PaymentsPage() {
       {loading ? (
         <div className="flex justify-center py-16"><div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-500 border-t-transparent" /></div>
       ) : (
-        <div className="card overflow-hidden p-0">
+        <>
+        <div className="space-y-3 md:hidden">
+          {payments.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => openDetail(p)}
+              className="mobile-card w-full text-left"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="font-bold text-brand-700">{formatOrderNumber(p.serviceOrder.orderNumber)}</p>
+                  {isAdmin && <p className="text-sm text-slate-500">{p.thirdParty.name}</p>}
+                </div>
+                <StatusBadge status={p.status} type="payment" />
+              </div>
+              <div className="mt-3 space-y-1">
+                <div className="mobile-card-row">
+                  <span className="mobile-card-label">Calculado</span>
+                  <span className="mobile-card-value">{formatCurrency(p.calculatedAmount)}</span>
+                </div>
+                <div className="mobile-card-row">
+                  <span className="mobile-card-label">Pago</span>
+                  <span className="mobile-card-value text-green-600">{formatCurrency(p.paidAmount)}</span>
+                </div>
+                <div className="mobile-card-row">
+                  <span className="mobile-card-label">Restante</span>
+                  <span className="mobile-card-value text-amber-600">{formatCurrency(p.remainingAmount)}</span>
+                </div>
+              </div>
+            </button>
+          ))}
+          {payments.length === 0 && <p className="py-12 text-center text-slate-400">Nenhum pagamento encontrado</p>}
+        </div>
+
+        <div className="card hidden overflow-hidden p-0 md:block">
+          <div className="table-scroll">
           <table className="w-full text-sm">
             <thead className="border-b border-slate-100 bg-slate-50/80">
               <tr>
@@ -171,10 +207,13 @@ export function PaymentsPage() {
             </tbody>
           </table>
           {payments.length === 0 && <p className="py-16 text-center text-slate-400">Nenhum pagamento encontrado</p>}
+          </div>
         </div>
+        </>
       )}
 
-      <p className="mt-3 text-center text-xs text-slate-400">Clique em qualquer linha para validar os serviços da OS</p>
+      <p className="mt-3 text-center text-xs text-slate-400 hidden md:block">Clique em qualquer linha para validar os serviços da OS</p>
+      <p className="mt-3 text-center text-xs text-slate-400 md:hidden">Toque em um pagamento para ver detalhes</p>
 
       {/* Modal de validação / detalhes */}
       <Modal open={detailModal} onClose={() => setDetailModal(false)} title="Validar Pagamento e Serviços" size="xl">

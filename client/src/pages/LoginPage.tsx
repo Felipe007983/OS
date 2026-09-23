@@ -28,7 +28,7 @@ export function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-[100dvh]">
       <div className="hidden flex-1 flex-col justify-between bg-gradient-to-br from-brand-600 via-brand-700 to-brand-800 p-12 text-white lg:flex">
         <Logo size="lg" />
 
@@ -43,7 +43,7 @@ export function LoginPage() {
         <p className="text-sm text-brand-200">© 2026 Allianç@ SAFETY — Sistema de Gestão</p>
       </div>
 
-      <div className="flex flex-1 items-center justify-center bg-white p-6">
+      <div className="flex flex-1 items-center justify-center bg-white p-4 pb-safe sm:p-6">
         <div className="w-full max-w-md">
           <div className="mb-8 flex justify-center lg:hidden">
             <Logo size="lg" />

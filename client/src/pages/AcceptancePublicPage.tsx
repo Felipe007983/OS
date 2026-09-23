@@ -80,8 +80,8 @@ export function AcceptancePublicPage() {
   const { order } = data;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-brand-50 to-white">
-      <div className="mx-auto max-w-2xl px-4 py-8">
+    <div className="min-h-[100dvh] bg-gradient-to-b from-brand-50 to-white pb-safe">
+      <div className="mx-auto max-w-2xl px-4 py-6 sm:py-8">
         <div className="mb-6 flex flex-col items-center gap-3">
           <Logo size="lg" />
           <div className="text-center">

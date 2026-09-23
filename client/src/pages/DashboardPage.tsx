@@ -76,10 +76,10 @@ export function DashboardPage() {
         <div className="card">
           <h3 className="mb-4 text-sm font-semibold text-slate-700">Produção por Costureira</h3>
           {charts.seamstressProduction.length > 0 ? (
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={charts.seamstressProduction}>
+            <ResponsiveContainer width="100%" height={220} className="sm:!h-[280px]">
+              <BarChart data={charts.seamstressProduction} margin={{ left: -10, right: 4 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                <XAxis dataKey="name" tick={{ fontSize: 10 }} interval={0} angle={-20} textAnchor="end" height={50} />
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip />
                 <Bar dataKey="pieces" fill="#22c55e" radius={[4, 4, 0, 0]} name="Peças" />
@@ -93,9 +93,9 @@ export function DashboardPage() {
         <div className="card">
           <h3 className="mb-4 text-sm font-semibold text-slate-700">OS por Status</h3>
           {statusChart.length > 0 ? (
-            <ResponsiveContainer width="100%" height={280}>
+            <ResponsiveContainer width="100%" height={220} className="sm:!h-[280px]">
               <PieChart>
-                <Pie data={statusChart} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} label={({ name, value }) => `${name}: ${value}`}>
+                <Pie data={statusChart} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, value }) => `${name}: ${value}`}>
                   {statusChart.map((_, i) => (
                     <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                   ))}

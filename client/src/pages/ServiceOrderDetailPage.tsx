@@ -248,7 +248,7 @@ export function ServiceOrderDetailPage() {
                   </div>
                   <p className="mt-1 text-sm text-brand-100">Versão {order.version} · Criada em {formatDate(order.createdAt)}</p>
                 </div>
-                <div className="text-right">
+                <div className="sm:text-right">
                   <p className="text-2xl font-bold">{formatCurrency(order.totalAmount)}</p>
                   <p className="text-sm text-brand-100">{order.totalPieces} peças · Prazo {formatDate(order.dueDate)}</p>
                 </div>
@@ -267,7 +267,7 @@ export function ServiceOrderDetailPage() {
 
             {order.notes && <div className="border-t border-slate-100 px-5 py-3 text-sm text-slate-600"><strong>Obs:</strong> {order.notes}</div>}
 
-            <div className="border-t border-slate-100 px-5 py-4 flex flex-wrap gap-2">
+            <div className="border-t border-slate-100 px-4 py-4 action-grid sm:px-5">
               {canSendLink && (
                 <>
                   <button onClick={() => handleGenerateLink(false)} disabled={actionLoading} className="btn-primary text-xs"><Link2 className="h-3.5 w-3.5" /> Gerar links</button>
@@ -311,7 +311,9 @@ export function ServiceOrderDetailPage() {
 
           <div className="card p-0 overflow-hidden">
             <div className="border-b border-slate-100 px-5 py-3"><h3 className="font-semibold text-slate-900">Itens da OS</h3></div>
-            <div className="overflow-x-auto">
+            <div className="table-scroll-wrap">
+              <p className="table-scroll-hint">Deslize para ver todas as colunas</p>
+              <div className="table-scroll">
               <table className="w-full text-sm">
                 <thead className="bg-slate-50 text-slate-500">
                   <tr>
@@ -338,6 +340,7 @@ export function ServiceOrderDetailPage() {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
 
