@@ -1,4 +1,8 @@
 {
+  "installCommand": "npm install",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
   "build": {
     "env": {
       "VITE_API_URL": "https://server-xi-seven-17.vercel.app/api"
