@@ -1,7 +1,7 @@
 {
-  "installCommand": "npm install --include=dev",
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
+  "installCommand": "cd client && npm install --include=dev",
+  "buildCommand": "cd client && npm run build",
+  "outputDirectory": "client/dist",
   "build": {
     "env": {
       "VITE_API_URL": "https://server-xi-seven-17.vercel.app/api"
