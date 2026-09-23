@@ -5,6 +5,7 @@ import { authenticateToken, requireAdmin } from '../../middlewares/auth.middlewa
 import { logAudit } from '../../middlewares/audit.service.js';
 import { OS_STATUS } from '../../shared/stateMachine.js';
 import { ensurePaymentForOrder, syncPaymentFromApprovedItems } from '../../shared/payment.service.js';
+import { getParam } from '../../shared/params.js';
 
 export const deliveriesRouter = Router();
 
@@ -131,7 +132,7 @@ deliveriesRouter.post('/', async (req: Request, res: Response): Promise<void> =>
 // Conferência de Entrega (Exclusivo Administrador - Item 14)
 deliveriesRouter.post('/:deliveryId/conference', requireAdmin, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { deliveryId } = req.params;
+    const deliveryId = getParam(req, 'deliveryId');
     const user = req.user!;
 
     const parseResult = conferenceDeliverySchema.safeParse(req.body);

@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { prisma } from '../../config/database.js';
 import { authenticateToken, requireAdmin } from '../../middlewares/auth.middleware.js';
 import { logAudit } from '../../middlewares/audit.service.js';
+import { getParam } from '../../shared/params.js';
 
 export const usersRouter = Router();
 
@@ -131,7 +132,7 @@ usersRouter.post('/', async (req: Request, res: Response): Promise<void> => {
 
 usersRouter.put('/:id', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getParam(req, 'id');
     const companyId = req.user!.companyId;
 
     const parseResult = updateUserSchema.safeParse(req.body);
@@ -211,7 +212,7 @@ usersRouter.put('/:id', async (req: Request, res: Response): Promise<void> => {
 
 usersRouter.delete('/:id', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getParam(req, 'id');
     const companyId = req.user!.companyId;
 
     if (id === req.user!.id) {

@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { prisma } from '../../config/database.js';
 import { authenticateToken, requireAdmin } from '../../middlewares/auth.middleware.js';
 import { logAudit } from '../../middlewares/audit.service.js';
+import { getParam } from '../../shared/params.js';
 
 export const thirdPartiesRouter = Router();
 
@@ -146,7 +147,7 @@ thirdPartiesRouter.get('/', requireAdmin, async (req: Request, res: Response): P
 // Detalhes de uma costureira específica
 thirdPartiesRouter.get('/:id', requireAdmin, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getParam(req, 'id');
     const thirdParty = await prisma.thirdParty.findFirst({
       where: { id, companyId: req.user!.companyId },
       include: {
@@ -246,7 +247,7 @@ thirdPartiesRouter.post('/', requireAdmin, async (req: Request, res: Response): 
 // Atualizar Costureira
 thirdPartiesRouter.put('/:id', requireAdmin, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getParam(req, 'id');
     const companyId = req.user!.companyId;
 
     const existing = await prisma.thirdParty.findFirst({

@@ -6,6 +6,7 @@ import { ENV } from '../../config/env.js';
 import { authenticateToken } from '../../middlewares/auth.middleware.js';
 import { logAudit } from '../../middlewares/audit.service.js';
 import { OS_STATUS } from '../../shared/stateMachine.js';
+import { getParam } from '../../shared/params.js';
 
 export const acceptanceRouter = Router();
 
@@ -14,7 +15,7 @@ export const acceptanceRouter = Router();
 // -------------------------------------------------------------
 acceptanceRouter.post('/generate-link/:orderId', authenticateToken, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { orderId } = req.params;
+    const orderId = getParam(req, 'orderId');
     const user = req.user!;
 
     const os = await prisma.serviceOrder.findFirst({
@@ -119,7 +120,7 @@ acceptanceRouter.post('/generate-link/:orderId', authenticateToken, async (req: 
 // -------------------------------------------------------------
 acceptanceRouter.get('/public/:token', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { token } = req.params;
+    const token = getParam(req, 'token');
 
     const tokenRecord = await prisma.acceptanceToken.findUnique({
       where: { token },
@@ -188,7 +189,7 @@ acceptanceRouter.get('/public/:token', async (req: Request, res: Response): Prom
 // -------------------------------------------------------------
 acceptanceRouter.post('/public/:token/accept', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { token } = req.params;
+    const token = getParam(req, 'token');
 
     const tokenRecord = await prisma.acceptanceToken.findUnique({
       where: { token },
@@ -280,7 +281,7 @@ acceptanceRouter.post('/public/:token/accept', async (req: Request, res: Respons
 // -------------------------------------------------------------
 acceptanceRouter.post('/public/:token/reject', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { token } = req.params;
+    const token = getParam(req, 'token');
     const { reason } = req.body;
 
     if (!reason || reason.trim().length < 3) {
@@ -344,7 +345,7 @@ acceptanceRouter.post('/public/:token/reject', async (req: Request, res: Respons
 // -------------------------------------------------------------
 acceptanceRouter.post('/public/:token/sign-with-login', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { token } = req.params;
+    const token = getParam(req, 'token');
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -458,7 +459,7 @@ acceptanceRouter.post('/public/:token/sign-with-login', async (req: Request, res
 // -------------------------------------------------------------
 acceptanceRouter.post('/auth/:orderId/accept', authenticateToken, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { orderId } = req.params;
+    const orderId = getParam(req, 'orderId');
     const user = req.user!;
 
     const os = await prisma.serviceOrder.findFirst({

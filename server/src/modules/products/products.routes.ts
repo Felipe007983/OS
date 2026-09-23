@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { prisma } from '../../config/database.js';
 import { authenticateToken, requireAdmin } from '../../middlewares/auth.middleware.js';
+import { getParam } from '../../shared/params.js';
 
 export const productsRouter = Router();
 
@@ -57,7 +58,7 @@ productsRouter.post('/', requireAdmin, async (req: Request, res: Response): Prom
 
 productsRouter.put('/:id', requireAdmin, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getParam(req, 'id');
     const updated = await prisma.product.updateMany({
       where: { id, companyId: req.user!.companyId },
       data: req.body,

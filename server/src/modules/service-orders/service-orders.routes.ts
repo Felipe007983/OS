@@ -6,6 +6,7 @@ import { logAudit } from '../../middlewares/audit.service.js';
 import { canTransitionOS, OS_STATUS } from '../../shared/stateMachine.js';
 import { computeSituationLabel } from '../../shared/situation.js';
 import { ensurePaymentForOrder, syncPaymentFromApprovedItems } from '../../shared/payment.service.js';
+import { getParam } from '../../shared/params.js';
 
 export const serviceOrdersRouter = Router();
 
@@ -198,7 +199,7 @@ serviceOrdersRouter.get('/', async (req: Request, res: Response): Promise<void> 
 serviceOrdersRouter.get('/:id', async (req: Request, res: Response): Promise<void> => {
   try {
     const user = req.user!;
-    const { id } = req.params;
+    const id = getParam(req, 'id');
 
     const os = await prisma.serviceOrder.findFirst({
       where: {
@@ -340,7 +341,7 @@ serviceOrdersRouter.post('/', async (req: Request, res: Response): Promise<void>
 // Alteração de estado da OS
 serviceOrdersRouter.patch('/:id/status', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = getParam(req, 'id');
     const { nextStatus, reason } = req.body;
     const user = req.user!;
 
@@ -405,7 +406,7 @@ serviceOrdersRouter.put('/:id', async (req: Request, res: Response): Promise<voi
       return;
     }
 
-    const { id } = req.params;
+    const id = getParam(req, 'id');
     const { dueDate, notes, pricingModel, fixedPriceAmount, items } = req.body;
 
     const existing = await prisma.serviceOrder.findFirst({

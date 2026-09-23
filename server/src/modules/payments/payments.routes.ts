@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { prisma } from '../../config/database.js';
 import { authenticateToken, requireAdmin } from '../../middlewares/auth.middleware.js';
 import { logAudit } from '../../middlewares/audit.service.js';
+import { getParam } from '../../shared/params.js';
 
 export const paymentsRouter = Router();
 
@@ -55,7 +56,7 @@ paymentsRouter.get('/', async (req: Request, res: Response): Promise<void> => {
 // Detalhes do pagamento com OS completa para validação
 paymentsRouter.get('/:paymentId', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { paymentId } = req.params;
+    const paymentId = getParam(req, 'paymentId');
     const user = req.user!;
 
     const payment = await prisma.payment.findFirst({
@@ -91,7 +92,7 @@ paymentsRouter.get('/:paymentId', async (req: Request, res: Response): Promise<v
 // Registrar baixa de pagamento (Admin)
 paymentsRouter.post('/:paymentId/pay', requireAdmin, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { paymentId } = req.params;
+    const paymentId = getParam(req, 'paymentId');
     const parseResult = settlePaymentSchema.safeParse(req.body);
     if (!parseResult.success) {
       res.status(400).json({ error: parseResult.error.errors[0].message });
